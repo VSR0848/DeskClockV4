@@ -1,2 +1,2 @@
 # DeskClockV4
-Trial Version
+Mini DIY clock for fun
