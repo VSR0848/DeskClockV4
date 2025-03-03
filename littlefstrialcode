@@ -1,0 +1,74 @@
+#include "FS.h"
+#include "LittleFS.h"
+
+#define WIFI_CREDENTIALS_FILE "/wifi_credentials.txt"  // Correct path
+
+// Function prototype (declare before setup)
+void readFile(fs::FS &fs, const char *filename);
+
+void setup() {
+  Serial.begin(115200);
+
+  if (!LittleFS.begin(true)) {  // True enables formatting if needed
+    Serial.println("⚠️ LittleFS Mount Failed!");
+    return;
+  }
+
+  Serial.println("✅ LittleFS Mounted Successfully");
+
+  // Read WiFi credentials from the file
+  listFiles();
+  if (!LittleFS.exists(WIFI_CREDENTIALS_FILE)) {
+    Serial.println("⚠️ WiFi credentials file not found! Creating a new one...");
+    writeWiFiCredentials();
+}
+
+
+  readFile(LittleFS, WIFI_CREDENTIALS_FILE);
+}
+
+void readFile(fs::FS &fs, const char *filename) {
+  Serial.printf("📂 Reading file: %s\n", filename);
+  
+  File file = fs.open(filename, "r");
+  if (!file) {
+    Serial.println("❌ Failed to open file for reading");
+    return;
+  }
+
+  while (file.available()) {
+    Serial.write(file.read());  // Print file content
+  }
+  
+  file.close();
+}
+void loop() {
+  // Your main loop code goes here
+}
+
+void listFiles() {
+  Serial.println("📂 Listing files in LittleFS:");
+  File root = LittleFS.open("/");
+  File file = root.openNextFile();
+  while (file) {
+    Serial.printf("📄 %s\n", file.name());
+    file = root.openNextFile();
+  }
+}
+
+void writeWiFiCredentials() {
+  Serial.println("✍️ Writing default WiFi credentials...");
+
+  File file = LittleFS.open("/wifi_credentials.txt", "w");
+  if (!file) {
+    Serial.println("❌ Failed to create WiFi credentials file!");
+    return;
+  }
+
+  file.println("MyWiFiSSID,MyWiFiPassword"); // Replace with actual credentials
+  file.close();
+  Serial.println("✅ WiFi credentials saved.");
+}
+
+
+
